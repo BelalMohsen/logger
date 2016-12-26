@@ -1,0 +1,13 @@
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'db_name',
+        'USER': 'username',
+        'PASSWORD': 'password',
+        'HOST': 'db.example.com',
+        'PORT': 3306,
+    }
+}
+
+SECRET_KEY = "TOPSECRET"
+DEBUG = True
