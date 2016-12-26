@@ -1,0 +1,1 @@
+Logger for any type of data. This README is mostly a placeholder.
