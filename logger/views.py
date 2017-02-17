@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
@@ -20,7 +22,13 @@ def log_value(request, slug, value):
             return HttpResponse("bad val")
         value = Value(datum=datum, float_value=val)
         value.save()
+    elif datum.type == Datum.TIMESTAMP:
+        if value != "timestamp":
+            return HttpResponse('timestamp datum but value was not "timestamp"')
+
+        value = Value(datum=datum)
+        value.save()
     else:
-        raise NotImplementedError
+        raise NotImplementedError('handling for {} datums not implemented yet'.format(datum.type))
 
     return HttpResponse("saved: slug: {}, value: {}".format(slug, value))

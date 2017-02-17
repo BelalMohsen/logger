@@ -28,11 +28,13 @@ class Datum(models.Model):
     STRING = "STRING"
     DATE = "DATE"
     DATETIME = "DATETIME"
+    TIMESTAMP = "TIMESTAMP"
     TYPE_CHOICES = [(INT, "Integer"),
                     (FLOAT, "Float"),
                     (STRING, "String"),
                     (DATE, "Date"),
-                    (DATETIME, "Date & time")]
+                    (DATETIME, "Date & time"),
+                    (TIMESTAMP, "Timestamp")]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=20, null=False, blank=False)
@@ -59,6 +61,8 @@ class Value(models.Model):
         value = "UNDEFINED"
         if self.datum.type == Datum.FLOAT:
             value = self.float_value
+        elif self.datum.type == Datum.TIMESTAMP:
+            value = self.timestamp
         else:
-            raise NotImplementedError
+            raise NotImplementedError('no __str__ defined for datum type {}'.format(self.datum.type))
         return "{} at {}: {}".format(self.datum.name, self.timestamp, value)
