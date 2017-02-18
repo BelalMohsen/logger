@@ -6,6 +6,7 @@ from . import views
 urlpatterns = [
     url(r'^$', views.index, name='index'),
 
+    url(r'^datum/(?P<datum_id>.+?)$', views.datum, name='datum'),
 
     url('^login/$', auth_views.login, name="user_login"),
     url('^logout/$', auth_views.logout, {'template_name': 'registration/logout.html'}, name='user_logout'),

@@ -1,6 +1,6 @@
 {% extends 'logger/master_layout.html' %}
 
-{%  block pagetitle  %} Index {% endblock %}
+{%  block pagetitle  %} Datum {% endblock %}
 
 {% block body %}
 <div id="wrapper">
@@ -10,12 +10,8 @@
     </nav>
     <section id="content">
         <div class="col-md-10 col-md-offset-1">
-            <h3>Datums</h3>
-            <ul>
-                {% for datum in datums %}
-                <li><a href="{% url 'datum' datum.pk %}">{{ datum.name }}</a></li>
-                {% endfor %}
-            </ul>
+            Hi {{ request.user.username }}!<br>
+            This is datum {{ datum.name }}.
         </div>
     </section>
     <aside>

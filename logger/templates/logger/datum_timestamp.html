@@ -1,0 +1,39 @@
+{% extends 'logger/master_layout.html' %}
+
+{%  block pagetitle  %} Datum {% endblock %}
+
+{% block body %}
+<div id="wrapper">
+    <header>
+    </header>
+    <nav>
+    </nav>
+    <section id="content">
+        <div class="col-md-10 col-md-offset-1">
+            <h3>{{ datum.name }}</h3>
+            <ul>
+                {% for day, entries, sum in days %}
+                    <li>{{ day }}
+                        <ul>
+                            {% for entry in entries %}
+                                <li>
+                                    {{ entry }}
+                                    {% if entry.diff %}
+                                        {{ entry.diff }}
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                            <li><ul><li><b>{{ sum }}</b></li></ul></li>
+                        </ul>
+                    </li>
+
+                {% endfor %}
+            </ul>
+        </div>
+    </section>
+    <aside>
+    </aside>
+    <footer>
+    </footer>
+</div>
+{% endblock %}
