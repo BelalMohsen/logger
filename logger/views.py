@@ -2,8 +2,9 @@ import datetime
 import operator
 
 from django.contrib.auth.decorators import login_required
+from django.http import Http404
 from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 
 from logger.utils import format_timedelta
 from .models import Value, Datum
@@ -36,7 +37,7 @@ def timestamp_datum(request, datum, context):
     days = {}
 
     for value in values:
-        day = value.timestamp.date()
+        day = value.timestamp.date().strftime("%Y-%m-%d")
 
         if day not in days:
             days[day] = []
@@ -69,6 +70,23 @@ def timestamp_datum(request, datum, context):
     context['days'] = days_with_sums
 
     return context
+
+def add_lunch(request, slug, date, duration):
+    datum = get_object_or_404(Datum, slug=slug)
+    duration = int(duration)
+
+    try:
+        date = datetime.datetime.strptime(date, "%Y-%m-%d")
+    except Exception as e:
+        return Http404(e)
+
+    start = datetime.datetime(year=date.year, month=date.month, day=date.day, hour=12, minute=0, second=0, microsecond=0)
+    end = datetime.datetime(year=date.year, month=date.month, day=date.day, hour=12, minute=duration, second=0, microsecond=0)
+
+    Value.objects.create(datum=datum, timestamp=start)
+    Value.objects.create(datum=datum, timestamp=end)
+
+    return redirect('datum', datum_id=3)
 
 
 def log_value(request, slug, value):

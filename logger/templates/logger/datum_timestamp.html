@@ -13,7 +13,10 @@
             <h3>{{ datum.name }}</h3>
             <ul>
                 {% for day, entries, sum in days %}
-                    <li>{{ day }}
+                    <li>{{ day }} (add lunch:
+                        <a href="{% url 'add_lunch' datum.slug day 30 %}">30</a>
+                        <a href="{% url 'add_lunch' datum.slug day 45 %}">45</a>
+                        <a href="{% url 'add_lunch' datum.slug day 60 %}">60</a>)
                         <ul>
                             {% for entry in entries %}
                                 <li>

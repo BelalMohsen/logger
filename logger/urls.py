@@ -17,7 +17,9 @@ urlpatterns = [
     url('^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
         auth_views.password_reset_confirm, name='user_password_reset_confirm'),
     url('^reset/done/$', auth_views.password_reset_complete, name='user_password_reset_complete'),
-    
+
+    url(r'^(?P<slug>.+?)/add_lunch/(?P<date>.+?)/(?P<duration>\d+)/?$', views.add_lunch, name="add_lunch"),
+
     url(r'^(?P<slug>.+?)/(?P<value>.+?)/?$', views.log_value, name="log_value"),
 
 ]
