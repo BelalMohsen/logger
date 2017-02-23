@@ -19,7 +19,7 @@
                                 <li>
                                     {{ entry }}
                                     {% if entry.diff %}
-                                        {{ entry.diff }}
+                                    (<i>{{ entry.diff }}</i>)
                                     {% endif %}
                                 </li>
                             {% endfor %}

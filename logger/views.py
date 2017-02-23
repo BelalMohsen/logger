@@ -31,7 +31,7 @@ def datum(request, datum_id):
 
 
 def timestamp_datum(request, datum, context):
-    values = Value.objects.filter(datum=datum)
+    values = Value.objects.filter(datum=datum).order_by('timestamp')
 
     days = {}
 

@@ -62,7 +62,7 @@ class Value(models.Model):
         if self.datum.type == Datum.FLOAT:
             value = self.float_value
         elif self.datum.type == Datum.TIMESTAMP:
-            value = self.timestamp
+            return "{} at {}".format(self.datum.name, self.timestamp.strftime("%H:%M:%S"))
         else:
             raise NotImplementedError('no __str__ defined for datum type {}'.format(self.datum.type))
         return "{} at {}: {}".format(self.datum.name, self.timestamp, value)
