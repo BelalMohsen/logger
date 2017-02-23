@@ -51,11 +51,11 @@ class Datum(models.Model):
 class Value(models.Model):
     datum = models.ForeignKey(Datum, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(blank=False, null=False, default=timezone.now)
-    int_value = models.IntegerField(null=True)
-    float_value = models.FloatField(null=True)
-    string_value = models.CharField(max_length=256, null=True)
-    date_value = models.DateField(null=True)
-    datetime_value = models.DateTimeField(null=True)
+    int_value = models.IntegerField(null=True, blank=True)
+    float_value = models.FloatField(null=True, blank=True)
+    string_value = models.CharField(max_length=256, null=True, blank=True)
+    date_value = models.DateField(null=True, blank=True)
+    datetime_value = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         value = "UNDEFINED"
