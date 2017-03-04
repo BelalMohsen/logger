@@ -1,5 +1,7 @@
 {% extends 'logger/master_layout.html' %}
 
+{% load logger_tags %}
+
 {%  block pagetitle  %} Datum {% endblock %}
 
 {% block body %}
@@ -19,14 +21,9 @@
     </nav>
     <section id="content">
         <div class="col-md-10 col-md-offset-1">
-            <h3>{{ datum.name }}</h3>
+            <h3>{{ datum.name }}, week starting on {{ from_date }}</h3>
             <table class="table">
-                <thead>
-                <tr>
-                    <th>Day</th>
-                    <th colspan="24">Hours</th>
-                </tr>
-                </thead>
+
                 <tbody>
                 <tr>
                     <td>&nbsp;</td>
@@ -36,7 +33,7 @@
                 </tr>
                 {% for day_table_row in day_table_rows %}
                     <tr>
-                        <td>{{ forloop.counter }}</td>
+                        <td>{{ forloop.counter0|number_to_weekday }}</td>
                         {% autoescape off %}
                         {% for cell in day_table_row %}
                             {{ cell.render }}

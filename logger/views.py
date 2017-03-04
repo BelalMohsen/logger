@@ -102,6 +102,7 @@ def timestamp_datum(request, datum, context):
     context['days'] = days_with_sums
     context['hours'] = hours
     context['day_table_rows'] = day_table_rows
+    context['from_date'] = from_date
 
     return context
 
