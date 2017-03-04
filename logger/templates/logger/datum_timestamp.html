@@ -54,7 +54,7 @@
                         <ul>
                             {% for entry in entries %}
                                 <li>
-                                    {{ entry }}
+                                    {{ entry.timestamp|date:"H:i" }}
                                     {% if entry.diff %}
                                     (<i>{{ entry.diff }}</i>)
                                     {% endif %}
