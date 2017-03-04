@@ -1,3 +1,9 @@
+class WeekTableRow(list):
+    def __init__(self, day):
+        super(WeekTableRow, self).__init__()
+        self.day = day
+
+
 class TableCell(object):
     EMPTY = 0
     START = 1

@@ -13,8 +13,9 @@ def format_timedelta(delta):
         return "{:d}h {:d}m {:d}s".format(hours, minutes, seconds)
 
 
-def monday_this_week():
-    today = datetime.date.today()
+def monday_this_week(today=None):
+    if today is None:
+        today = datetime.date.today()
     monday = today - datetime.timedelta(days=today.weekday())
 
     return monday

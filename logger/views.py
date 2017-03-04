@@ -6,7 +6,7 @@ from django.http import Http404
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 
-from logger.timestamp_table import TableCell
+from logger.timestamp_table import TableCell, WeekTableRow
 from logger.utils import format_timedelta, monday_this_week
 from .models import Value, Datum
 
@@ -33,11 +33,22 @@ def datum(request, datum_id):
 
 
 def timestamp_datum(request, datum, context):
-    values = Value.objects.filter(datum=datum).order_by('timestamp')
+
+    if 'week' in request.GET and request.GET['week'].isdigit():
+        week = int(request.GET['week'])
+        year = datetime.datetime.today().year
+        date = datetime.datetime.strptime("{}-W{}-1".format(year, week), "%Y-W%W-%w").date()
+        from_date = monday_this_week(today=date)
+    else:
+        from_date = monday_this_week()
+
+    to_date = from_date + datetime.timedelta(days=7)
+
+    week_values = Value.objects.filter(datum=datum, timestamp__gte=from_date, timestamp__lt=to_date).order_by('timestamp')
 
     days = {}
 
-    for value in values:
+    for value in week_values:
         day = value.timestamp.date().strftime("%Y-%m-%d")
 
         if day not in days:
@@ -63,15 +74,13 @@ def timestamp_datum(request, datum, context):
 
     day_table_rows = []
     for day in range(7):
-        day_table_rows.append([])
+        day_table_rows.append(WeekTableRow(from_date + datetime.timedelta(days=day)))
         for hour in range(24):
             day_table_rows[day].append(TableCell())
 
-    from_date = monday_this_week()
-
     for day_index, row in enumerate(day_table_rows):
         day = from_date + datetime.timedelta(days=day_index)
-        values = Value.objects.filter(timestamp__gte=from_date, timestamp__date=day).order_by('timestamp')
+        values = week_values.filter(timestamp__gte=from_date, timestamp__date=day).order_by('timestamp')
 
         started = False
         for cell_index, cell in enumerate(row):
@@ -103,6 +112,7 @@ def timestamp_datum(request, datum, context):
     context['hours'] = hours
     context['day_table_rows'] = day_table_rows
     context['from_date'] = from_date
+    context['week'] = from_date.strftime("%U")
 
     return context
 

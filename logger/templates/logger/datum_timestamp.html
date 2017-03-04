@@ -21,7 +21,8 @@
     </nav>
     <section id="content">
         <div class="col-md-10 col-md-offset-1">
-            <h3>{{ datum.name }}, week starting on {{ from_date }}</h3>
+            <h3>{{ datum.name }}</h3>
+            <h4><a href="{% url 'datum' datum.pk %}?week={{ week|add:-1 }}"><<</a> week {{ week }} starting on {{ from_date }} <a href="{% url 'datum' datum.pk %}?week={{ week|add:1 }}">>></a> </h4>
             <table class="table">
 
                 <tbody>
@@ -33,7 +34,7 @@
                 </tr>
                 {% for day_table_row in day_table_rows %}
                     <tr>
-                        <td>{{ forloop.counter0|number_to_weekday }}</td>
+                        <td>{{ forloop.counter0|number_to_short_weekday }} {{ day_table_row.day|date:"b d" }}</td>
                         {% autoescape off %}
                         {% for cell in day_table_row %}
                             {{ cell.render }}
