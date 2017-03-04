@@ -3,6 +3,15 @@
 {%  block pagetitle  %} Datum {% endblock %}
 
 {% block body %}
+<style>
+    td.hour_header {
+        text-align: left;
+    }
+
+    td.day_cell {
+        border-left: 0.5pt solid #CCC;
+    }
+</style>
 <div id="wrapper">
     <header>
     </header>
@@ -11,6 +20,33 @@
     <section id="content">
         <div class="col-md-10 col-md-offset-1">
             <h3>{{ datum.name }}</h3>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Day</th>
+                    <th colspan="24">Hours</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>&nbsp;</td>
+                    {% for hour in hours %}
+                        <td class="hour_header">{{ hour|stringformat:"02d" }}</td>
+                    {% endfor %}
+                </tr>
+                {% for day_table_row in day_table_rows %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        {% autoescape off %}
+                        {% for cell in day_table_row %}
+                            {{ cell.render }}
+                        {% endfor %}
+                        {% endautoescape %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
             <ul>
                 {% for day, entries, sum in days %}
                     <li>{{ day }} (add lunch:
