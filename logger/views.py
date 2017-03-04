@@ -96,7 +96,7 @@ class TableCell(object):
                 "background-image: linear-gradient(to left, {self.color} 0%, {self.color} 100%);".format(self=self),
                 "background-repeat: no-repeat;",
                 "background-position: 100% 100%;",
-                "background-size: {}% 100%".format(int((1-self.start_factor)*100))]
+                "background-size: {}% 100%".format(int((1 - self.start_factor) * 100))]
             style = " ".join(styles)
             attributes = 'style="{}"'.format(style)
         elif self.state == self.END:
@@ -104,7 +104,7 @@ class TableCell(object):
                 "border-left: none;",
                 "background-image: linear-gradient(to right, {self.color} 0%, {self.color} 100%);".format(self=self),
                 "background-repeat: no-repeat;",
-                "background-size: {}% 100%".format(int(self.end_factor*100))]
+                "background-size: {}% 100%".format(int(self.end_factor * 100))]
             style = " ".join(styles)
             attributes = 'style="{}"'.format(style)
         elif self.state == self.PARTIAL:
@@ -112,7 +112,7 @@ class TableCell(object):
             styles = [
                 "background-image: linear-gradient(to right, {self.color} 0%, {self.color} 100%);".format(self=self),
                 "background-repeat: no-repeat;",
-                "background-position: {}% 100%;".format(int(self.start_factor*100)),
+                "background-position: {}% 100%;".format(int(self.start_factor * 100)),
                 "background-size: {}% 100%".format(int(fill * 100))]
             style = " ".join(styles)
             attributes = 'style="{}"'.format(style)
@@ -167,7 +167,7 @@ def timestamp_datum(request, datum, context):
                 if value.timestamp.hour == cell_index:
                     ts = value.timestamp
                     if not started:
-                        cell.set_start(ts.minute/60)
+                        cell.set_start(ts.minute / 60)
                         started = True
                     else:
                         if cell.state == TableCell.START:
@@ -203,8 +203,10 @@ def add_lunch(request, slug, date, duration):
     except Exception as e:
         return Http404(e)
 
-    start = datetime.datetime(year=date.year, month=date.month, day=date.day, hour=12, minute=0, second=0, microsecond=0)
-    end = datetime.datetime(year=date.year, month=date.month, day=date.day, hour=12, minute=duration, second=0, microsecond=0)
+    start = datetime.datetime(year=date.year, month=date.month, day=date.day, hour=12, minute=0, second=0,
+                              microsecond=0)
+    end = datetime.datetime(year=date.year, month=date.month, day=date.day, hour=12, minute=duration, second=0,
+                            microsecond=0)
 
     Value.objects.create(datum=datum, timestamp=start)
     Value.objects.create(datum=datum, timestamp=end)
