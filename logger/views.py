@@ -133,7 +133,7 @@ def timestamp_datum(request, datum, context):
     context['from_date'] = from_date
     context['week'] = from_date.strftime("%U")
     context['total_work_week_average'] = format_timedelta(total_work_week_average)
-    context['total_week_duration'] = format_timedelta(total_week_duration)
+    context['total_week_duration'] = format_timedelta(total_week_duration, use_days=False)
 
 
     return context

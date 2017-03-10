@@ -1,12 +1,16 @@
 import datetime
 
 
-def format_timedelta(delta):
+def format_timedelta(delta, use_days=True):
     days, seconds = delta.days, delta.seconds
     hours = int((seconds - (seconds % 3600))/3600)
     seconds %= 3600
     minutes = int((seconds - (seconds % 60)) / 60)
     seconds %= 60
+    if not use_days:
+        hours += days*24
+        days = 0
+
     if days:
         return "{:d}d {:d}h {:d}m {:d}s".format(days, hours, minutes, seconds)
     else:
