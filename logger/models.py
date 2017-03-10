@@ -44,6 +44,21 @@ class Datum(models.Model):
     color = RGBColorField(blank=False, null=False, default="#87BBFF")
     comment = models.CharField(max_length=100, blank=True, null=True)
 
+    @property
+    def color_rgba(self):
+        fmt = "rgba({red}, {green}, {blue}, {alpha})"
+
+        colors = {
+            'red': int(self.color[1:3], 16),
+            'green': int(self.color[3:5], 16),
+            'blue': int(self.color[5:7], 16),
+            'alpha': 1
+        }
+
+        print(colors)
+
+        return fmt.format(**colors)
+
     def __str__(self):
         return "{} ({}, {})".format(self.name, self.comment, self.slug)
 

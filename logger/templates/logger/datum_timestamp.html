@@ -31,6 +31,7 @@
                     {% for hour in hours %}
                         <td class="hour_header">{{ hour|stringformat:"02d" }}</td>
                     {% endfor %}
+                    <td>&nbsp;</td>
                 </tr>
                 {% for day_table_row in day_table_rows %}
                     <tr>
@@ -40,6 +41,7 @@
                             {{ cell.render }}
                         {% endfor %}
                         {% endautoescape %}
+                        <td class="day_cell">{% if day_table_row.total_duration %} {{ day_table_row.total_duration_str }} {% endif %}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

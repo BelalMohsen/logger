@@ -1,7 +1,25 @@
+import datetime
+
+from logger.utils import format_timedelta
+
+
 class WeekTableRow(list):
     def __init__(self, day):
         super(WeekTableRow, self).__init__()
         self.day = day
+        self._total_duration = datetime.timedelta()
+
+    @property
+    def total_duration(self):
+        return self._total_duration
+
+    @total_duration.setter
+    def total_duration(self, value):
+        self._total_duration = value
+
+    @property
+    def total_duration_str(self):
+        return format_timedelta(self.total_duration)
 
 
 class TableCell(object):
@@ -11,19 +29,20 @@ class TableCell(object):
     FULL = 4
     PARTIAL = 5
 
-    def __init__(self):
+    EMPTY_COLOR = "#FFFFFF00"
+
+    def __init__(self, row, hour, datum):
+        self.row = row
+        self.hour = hour
         self.state = self.EMPTY
-        self.value = "?"
+        self.value = ""
         self.start_factor = 0.0
         self.end_factor = 0.0
-        self.color = "#222222"
-
-        self.set_empty()
+        self.color = datum.color_rgba
 
     def set_full(self):
         self.state = self.FULL
         self.value = ""
-        self.color = "rgba(0, 150, 0, 1)"
 
     def set_empty(self):
         self.value = ""
@@ -35,27 +54,42 @@ class TableCell(object):
         self.start_factor = factor
         self.end_factor = 1.0
         self.value = ""
-        self.color = "rgba(0, 150, 0, 1)"
 
     def set_end(self, factor):
         self.state = self.END
         self.start_factor = 0.0
         self.end_factor = factor
         self.value = ""
-        self.color = "rgba(0, 150, 0, 1)"
 
     def set_partial(self, start_factor, end_factor):
         self.state = self.PARTIAL
         self.start_factor = start_factor
         self.end_factor = end_factor
         self.value = ""
-        self.color = "rgba(0, 150, 0, 1)"
+
+    @property
+    def timestamp(self):
+        if self.state == self.START:
+            factor = self.start_factor
+        elif self.state == self.END:
+            factor = self.end_factor
+        elif self.state == self.FULL:
+            factor = 0
+        elif self.state == self.EMPTY:
+            return ""
+        elif self.state == self.PARTIAL:
+            return "{:0>2d}:{:0>2d} - {:0>2d}:{:0>2d}".format(self.hour, int(60 * self.start_factor),
+                                                              self.hour, int(60 * self.end_factor))
+        else:
+            raise NotImplementedError
+
+        return "{:0>2d}:{:0>2d}".format(self.hour, int(60 * factor))
 
     def render(self):
         style = ""
         attributes = ""
         if self.state == self.EMPTY:
-            style = "background-color: {};".format(self.color)
+            style = "background-color: {};".format(self.EMPTY_COLOR)
             attributes = 'style="{}"'.format(style)
         elif self.state == self.FULL:
             styles = [
@@ -90,4 +124,4 @@ class TableCell(object):
             style = " ".join(styles)
             attributes = 'style="{}"'.format(style)
 
-        return '<td class="day_cell" {}>{}</td>'.format(attributes, self.value)
+        return '<td title="{}" class="day_cell" {}>{}</td>'.format(self.timestamp, attributes, self.value)

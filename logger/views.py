@@ -76,26 +76,29 @@ def timestamp_datum(request, datum, context):
     for day in range(7):
         day_table_rows.append(WeekTableRow(from_date + datetime.timedelta(days=day)))
         for hour in range(24):
-            day_table_rows[day].append(TableCell())
+            day_table_rows[day].append(TableCell(day_table_rows[day], hour, datum))
 
     for day_index, row in enumerate(day_table_rows):
         day = from_date + datetime.timedelta(days=day_index)
         values = week_values.filter(timestamp__gte=from_date, timestamp__date=day).order_by('timestamp')
 
-        started = False
+        started = None
         for cell_index, cell in enumerate(row):
             for value in values:
                 if value.timestamp.hour == cell_index:
                     ts = value.timestamp
                     if not started:
                         cell.set_start(ts.minute / 60)
-                        started = True
+                        started = value.timestamp
                     else:
                         if cell.state == TableCell.START:
                             cell.set_partial(cell.start_factor, ts.minute / 60)
                         else:
                             cell.set_end(ts.minute / 60)
-                        started = False
+
+                        row.total_duration += ts - started
+                        started = None
+
             if started and cell.state == TableCell.EMPTY:
                 cell.set_full()
 
