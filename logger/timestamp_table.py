@@ -27,9 +27,11 @@ class TableCell(object):
     START = 1
     END = 3
     FULL = 4
-    PARTIAL = 5
+    PARTIAL = 5  # a cell which contains a start and an end, ie. "..|....[XXX]....|..."
+    REVERSE_PARTIAL = 6  # a cell which contains an end and a start, ie. "..XX|XX]..[XX|XX.."
 
     EMPTY_COLOR = "#FFFFFF00"
+    BACKGROUND_COLOR = "#FFFFFFFF"
 
     def __init__(self, row, hour, datum):
         self.row = row
@@ -67,6 +69,12 @@ class TableCell(object):
         self.end_factor = end_factor
         self.value = ""
 
+    def set_reverse_partial(self, start_factor, end_factor):
+        self.state = self.REVERSE_PARTIAL
+        self.start_factor = start_factor
+        self.end_factor = end_factor
+        self.value = ""
+
     @property
     def timestamp(self):
         if self.state == self.START:
@@ -78,6 +86,9 @@ class TableCell(object):
         elif self.state == self.EMPTY:
             return ""
         elif self.state == self.PARTIAL:
+            return "{:0>2d}:{:0>2d} - {:0>2d}:{:0>2d}".format(self.hour, int(60 * self.start_factor),
+                                                              self.hour, int(60 * self.end_factor))
+        elif self.state == self.REVERSE_PARTIAL:
             return "{:0>2d}:{:0>2d} - {:0>2d}:{:0>2d}".format(self.hour, int(60 * self.start_factor),
                                                               self.hour, int(60 * self.end_factor))
         else:
@@ -118,6 +129,17 @@ class TableCell(object):
             fill = self.end_factor - self.start_factor
             styles = [
                 "background-image: linear-gradient(to right, {self.color} 0%, {self.color} 100%);".format(self=self),
+                "background-repeat: no-repeat;",
+                "background-position: {}% 100%;".format(int(self.start_factor * 100)),
+                "background-size: {}% 100%".format(int(fill * 100))]
+            style = " ".join(styles)
+            attributes = 'style="{}"'.format(style)
+        elif self.state == self.REVERSE_PARTIAL:
+            fill = self.end_factor - self.start_factor
+            styles = [
+                "border-left: none;",
+                "background-color: {self.color};".format(self=self),
+                "background-image: linear-gradient(to right, {self.BACKGROUND_COLOR} 0%, {self.BACKGROUND_COLOR} 100%);".format(self=self),
                 "background-repeat: no-repeat;",
                 "background-position: {}% 100%;".format(int(self.start_factor * 100)),
                 "background-size: {}% 100%".format(int(fill * 100))]

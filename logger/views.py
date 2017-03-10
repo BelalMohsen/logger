@@ -90,7 +90,10 @@ def timestamp_datum(request, datum, context):
                 if value.timestamp.hour == cell_index:
                     ts = value.timestamp
                     if not started:
-                        cell.set_start(ts.minute / 60)
+                        if cell.state == TableCell.END:
+                            cell.set_reverse_partial(cell.end_factor, ts.minute / 60)
+                        else:
+                            cell.set_start(ts.minute / 60)
                         started = value.timestamp
                     else:
                         if cell.state == TableCell.START:

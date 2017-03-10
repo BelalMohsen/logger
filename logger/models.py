@@ -55,8 +55,6 @@ class Datum(models.Model):
             'alpha': 1
         }
 
-        print(colors)
-
         return fmt.format(**colors)
 
     def __str__(self):
