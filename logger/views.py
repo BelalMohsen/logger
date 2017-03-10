@@ -78,6 +78,8 @@ def timestamp_datum(request, datum, context):
         for hour in range(24):
             day_table_rows[day].append(TableCell(day_table_rows[day], hour, datum))
 
+    now = datetime.datetime.now()
+
     for day_index, row in enumerate(day_table_rows):
         day = from_date + datetime.timedelta(days=day_index)
         values = week_values.filter(timestamp__gte=from_date, timestamp__date=day).order_by('timestamp')
@@ -100,7 +102,13 @@ def timestamp_datum(request, datum, context):
                         started = None
 
             if started and cell.state == TableCell.EMPTY:
-                cell.set_full()
+                if cell_index == now.hour:
+                    cell.set_end(now.minute / 60)
+                    row.total_duration += now - started
+                elif cell_index > now.hour:
+                    cell.set_empty()
+                else:
+                    cell.set_full()
 
     days = sorted(days.items(), key=operator.itemgetter(0))
     sums = []
