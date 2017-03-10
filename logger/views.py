@@ -80,6 +80,8 @@ def timestamp_datum(request, datum, context):
 
     now = datetime.datetime.now()
 
+    total_week_duration = datetime.timedelta()
+
     for day_index, row in enumerate(day_table_rows):
         day = from_date + datetime.timedelta(days=day_index)
         values = week_values.filter(timestamp__gte=from_date, timestamp__date=day).order_by('timestamp')
@@ -112,6 +114,9 @@ def timestamp_datum(request, datum, context):
                     cell.set_empty()
                 else:
                     cell.set_full()
+        total_week_duration += row.total_duration
+
+    total_work_week_average = total_week_duration / 5
 
     days = sorted(days.items(), key=operator.itemgetter(0))
     sums = []
@@ -127,6 +132,9 @@ def timestamp_datum(request, datum, context):
     context['day_table_rows'] = day_table_rows
     context['from_date'] = from_date
     context['week'] = from_date.strftime("%U")
+    context['total_work_week_average'] = format_timedelta(total_work_week_average)
+    context['total_week_duration'] = format_timedelta(total_week_duration)
+
 
     return context
 
