@@ -126,9 +126,12 @@ def add_lunch(request, slug, date, duration):
     except Exception as e:
         return Http404(e)
 
+    end_hour = 12 + int((duration - (duration % 60))/60)
+    end_minute = duration % 60
+
     start = datetime.datetime(year=date.year, month=date.month, day=date.day, hour=12, minute=0, second=0,
                               microsecond=0)
-    end = datetime.datetime(year=date.year, month=date.month, day=date.day, hour=12, minute=duration, second=0,
+    end = datetime.datetime(year=date.year, month=date.month, day=date.day, hour=end_hour, minute=end_minute, second=0,
                             microsecond=0)
 
     Value.objects.create(datum=datum, timestamp=start)
