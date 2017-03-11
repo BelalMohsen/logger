@@ -107,11 +107,14 @@ def timestamp_datum(request, datum, context):
                         started = None
 
             if started and cell.state == TableCell.EMPTY:
-                if cell_index == now.hour:
-                    cell.set_end(now.minute / 60)
-                    row.total_duration += now - started
-                elif cell_index > now.hour:
-                    cell.set_empty()
+                if now.weekday() == day_index:
+                    if cell_index == now.hour:
+                        cell.set_end(now.minute / 60)
+                        row.total_duration += now - started
+                    elif cell_index > now.hour:
+                        cell.set_empty()
+                    elif cell_index < now.hour:
+                        cell.set_full()
                 else:
                     cell.set_full()
         total_week_duration += row.total_duration
