@@ -41,6 +41,7 @@ def timestamp_datum(request, datum, context):
         from_date = monday_this_week(today=date)
     else:
         from_date = monday_this_week()
+        week = int(from_date.strftime("%W"))
 
     to_date = from_date + datetime.timedelta(days=7)
 
@@ -74,9 +75,10 @@ def timestamp_datum(request, datum, context):
 
     day_table_rows = []
     for day in range(7):
-        day_table_rows.append(WeekTableRow(from_date + datetime.timedelta(days=day)))
+        row = WeekTableRow(from_date + datetime.timedelta(days=day))
+        day_table_rows.append(row)
         for hour in range(24):
-            day_table_rows[day].append(TableCell(day_table_rows[day], hour, datum))
+            day_table_rows[day].append(TableCell(row, hour, datum))
 
     now = datetime.datetime.now()
 
@@ -106,17 +108,27 @@ def timestamp_datum(request, datum, context):
                         row.total_duration += ts - started
                         started = None
 
-            if started and cell.state == TableCell.EMPTY:
-                if now.weekday() == day_index:
-                    if cell_index == now.hour:
-                        cell.set_end(now.minute / 60)
-                        row.total_duration += now - started
-                    elif cell_index > now.hour:
-                        cell.set_empty()
-                    elif cell_index < now.hour:
-                        cell.set_full()
-                else:
+            if started:  # a time span has started earlier and not been closed, ie. the event is "in progress"
+                if now.weekday() == day_index and int(now.strftime("%W")) == week:  # it is today
+                    if cell.state == TableCell.EMPTY:
+                        if cell_index == now.hour:  # cell empty and we're on this hour's cell, so set "now" as the end
+                            cell.set_end(now.minute / 60)
+                            row.total_duration += now - started
+                        elif cell_index > now.hour:  # cell empty and we've passed "now", so set it to empty
+                            cell.set_empty()
+                        elif cell_index < now.hour:  # cell empty but not yet reached "now", mark as full and it will
+                            cell.set_full()          # be closed later
+                    elif cell.state == TableCell.START:  # the span started in this cell, AND ends within it
+                        if cell_index == now.hour:
+                            cell.set_partial(cell.start_factor, now.minute / 60)
+                            row.total_duration += now - started
+                elif started and cell.state == TableCell.EMPTY:  # it's not today, so just fill up the cell and hope the next iteration takes care of it
                     cell.set_full()
+
+            if started and cell_index == 23 and cell.state == TableCell.FULL:
+                end_of_day = datetime.datetime(year=started.year, month=started.month, day=started.day, hour=23, minute=59, second=0)
+                row.total_duration += end_of_day - started
+
         total_week_duration += row.total_duration
 
     total_work_week_average = total_week_duration / 5
@@ -137,7 +149,6 @@ def timestamp_datum(request, datum, context):
     context['week'] = from_date.strftime("%U")
     context['total_work_week_average'] = format_timedelta(total_work_week_average)
     context['total_week_duration'] = format_timedelta(total_week_duration, use_days=False)
-
 
     return context
 
