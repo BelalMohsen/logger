@@ -95,15 +95,17 @@ def timestamp_datum(request, datum, context):
                     ts = value.timestamp
                     if not started:
                         if cell.state == TableCell.END:
-                            cell.set_reverse_partial(cell.end_factor, ts.minute / 60)
+                            cell.set_reverse_partial(cell.end_factor, ts.minute / 60, start_timestamp=cell.end_timestamp, end_timestamp=ts)
                         else:
-                            cell.set_start(ts.minute / 60)
+                            cell.set_start(ts.minute / 60, timestamp=ts)
                         started = value.timestamp
                     else:
                         if cell.state == TableCell.START:
-                            cell.set_partial(cell.start_factor, ts.minute / 60)
+                            cell.set_partial(cell.start_factor, ts.minute / 60, start_timestamp=cell.start_timestamp, end_timestamp=ts)
+                            row.set_span_end(cell_index)
                         else:
-                            cell.set_end(ts.minute / 60)
+                            cell.set_end(ts.minute / 60, timestamp=ts)
+                            row.set_span_end(cell_index)
 
                         row.total_duration += ts - started
                         started = None
@@ -112,7 +114,8 @@ def timestamp_datum(request, datum, context):
                 if now.weekday() == day_index and int(now.strftime("%W")) == week:  # it is today
                     if cell.state == TableCell.EMPTY:
                         if cell_index == now.hour:  # cell empty and we're on this hour's cell, so set "now" as the end
-                            cell.set_end(now.minute / 60)
+                            cell.set_end(now.minute / 60, timestamp=now)
+                            row.set_span_end(cell_index)
                             row.total_duration += now - started
                         elif cell_index > now.hour:  # cell empty and we've passed "now", so set it to empty
                             cell.set_empty()
@@ -120,7 +123,8 @@ def timestamp_datum(request, datum, context):
                             cell.set_full()          # be closed later
                     elif cell.state == TableCell.START:  # the span started in this cell, AND ends within it
                         if cell_index == now.hour:
-                            cell.set_partial(cell.start_factor, now.minute / 60)
+                            cell.set_partial(cell.start_factor, now.minute / 60, start_timestamp=cell.start_timestamp, end_timestamp=now)
+                            row.set_span_end(cell_index)
                             row.total_duration += now - started
                 elif started and cell.state == TableCell.EMPTY:  # it's not today, so just fill up the cell and hope the next iteration takes care of it
                     cell.set_full()
@@ -128,6 +132,8 @@ def timestamp_datum(request, datum, context):
             if started and cell_index == 23 and cell.state == TableCell.FULL:
                 end_of_day = datetime.datetime(year=started.year, month=started.month, day=started.day, hour=23, minute=59, second=0)
                 row.total_duration += end_of_day - started
+                cell.end_timestamp = end_of_day
+                row.set_span_end(cell_index)
 
         total_week_duration += row.total_duration
 

@@ -21,6 +21,44 @@ class WeekTableRow(list):
     def total_duration_str(self):
         return format_timedelta(self.total_duration)
 
+    def set_span_end(self, cell_index):
+        cells_to_update = []
+        start = end = None
+        for cell in reversed(self[:cell_index+1]):
+            if cell.state == TableCell.START:
+                cells_to_update.append(cell)
+                start = cell.start_timestamp
+                break
+            elif cell.state == TableCell.PARTIAL:
+                cells_to_update.append(cell)
+                start = cell.start_timestamp
+                end = cell.end_timestamp
+                break
+            elif cell.state == TableCell.FULL:
+                cells_to_update.append(cell)
+                if cell.hour == 23:
+                    end = cell.end_timestamp
+            elif cell.state == TableCell.END:
+                cells_to_update.append(cell)
+                end = cell.end_timestamp
+            elif cell.state == TableCell.EMPTY:
+                break
+            elif cell.state == TableCell.REVERSE_PARTIAL:
+                cells_to_update.append(cell)
+                start = cell.end_timestamp
+                break
+            else:
+                raise NotImplementedError
+
+        delta = end - start
+
+        delta_str = format_timedelta(delta, use_days=False)
+
+        title = "{} - {} ({})".format(start.strftime("%H:%M:%S"), end.strftime("%H:%M:%S"), delta_str)
+
+        for cell in cells_to_update:
+            cell.title = title
+
 
 class TableCell(object):
     EMPTY = 0
@@ -38,9 +76,12 @@ class TableCell(object):
         self.hour = hour
         self.state = self.EMPTY
         self.value = ""
+        self.start_timestamp = None
+        self.end_timestamp = None
         self.start_factor = 0.0
         self.end_factor = 0.0
         self.color = datum.color_rgba
+        self.title = "NO TITLE"
 
     def set_full(self):
         self.state = self.FULL
@@ -51,50 +92,37 @@ class TableCell(object):
         self.state = self.EMPTY
         self.color = "#FFFFFF00"
 
-    def set_start(self, factor):
+    def set_start(self, factor, timestamp=None):
         self.state = self.START
+        self.start_timestamp = timestamp
         self.start_factor = factor
+        self.end_timestamp = None
         self.end_factor = 1.0
         self.value = ""
 
-    def set_end(self, factor):
+    def set_end(self, factor, timestamp=None):
         self.state = self.END
+        self.start_timestamp = None
         self.start_factor = 0.0
         self.end_factor = factor
+        self.end_timestamp = timestamp
         self.value = ""
 
-    def set_partial(self, start_factor, end_factor):
+    def set_partial(self, start_factor, end_factor, start_timestamp=None, end_timestamp=None):
         self.state = self.PARTIAL
         self.start_factor = start_factor
         self.end_factor = end_factor
+        self.start_timestamp=start_timestamp
+        self.end_timestamp=end_timestamp
         self.value = ""
 
-    def set_reverse_partial(self, start_factor, end_factor):
+    def set_reverse_partial(self, start_factor, end_factor, start_timestamp=None, end_timestamp=None):
         self.state = self.REVERSE_PARTIAL
         self.start_factor = start_factor
         self.end_factor = end_factor
+        self.start_timestamp = start_timestamp
+        self.end_timestamp = end_timestamp
         self.value = ""
-
-    @property
-    def timestamp(self):
-        if self.state == self.START:
-            factor = self.start_factor
-        elif self.state == self.END:
-            factor = self.end_factor
-        elif self.state == self.FULL:
-            factor = 0
-        elif self.state == self.EMPTY:
-            return ""
-        elif self.state == self.PARTIAL:
-            return "{:0>2d}:{:0>2d} - {:0>2d}:{:0>2d}".format(self.hour, int(60 * self.start_factor),
-                                                              self.hour, int(60 * self.end_factor))
-        elif self.state == self.REVERSE_PARTIAL:
-            return "{:0>2d}:{:0>2d} - {:0>2d}:{:0>2d}".format(self.hour, int(60 * self.start_factor),
-                                                              self.hour, int(60 * self.end_factor))
-        else:
-            raise NotImplementedError
-
-        return "{:0>2d}:{:0>2d}".format(self.hour, int(60 * factor))
 
     def render(self):
         style = ""
@@ -146,4 +174,4 @@ class TableCell(object):
             style = " ".join(styles)
             attributes = 'style="{}"'.format(style)
 
-        return '<td title="{}" class="day_cell" {}>{}</td>'.format(self.timestamp, attributes, self.value)
+        return '<td title="{}" class="day_cell" {}>{}</td>'.format(self.title, attributes, self.value)
