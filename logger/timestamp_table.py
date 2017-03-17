@@ -24,7 +24,7 @@ class WeekTableRow(list):
     def set_span_end(self, cell_index):
         cells_to_update = []
         start = end = None
-        for cell in reversed(self[:cell_index+1]):
+        for cell in reversed(self[:cell_index + 1]):
             if cell.state == TableCell.START:
                 cells_to_update.append(cell)
                 start = cell.start_timestamp
@@ -92,34 +92,34 @@ class TableCell(object):
         self.state = self.EMPTY
         self.color = "#FFFFFF00"
 
-    def set_start(self, factor, timestamp=None):
+    def set_start(self, timestamp):
         self.state = self.START
         self.start_timestamp = timestamp
-        self.start_factor = factor
+        self.start_factor = timestamp.minute / 60
         self.end_timestamp = None
         self.end_factor = 1.0
         self.value = ""
 
-    def set_end(self, factor, timestamp=None):
+    def set_end(self, timestamp):
         self.state = self.END
         self.start_timestamp = None
         self.start_factor = 0.0
-        self.end_factor = factor
+        self.end_factor = timestamp.minute / 60
         self.end_timestamp = timestamp
         self.value = ""
 
-    def set_partial(self, start_factor, end_factor, start_timestamp=None, end_timestamp=None):
+    def set_partial(self, start_timestamp, end_timestamp):
         self.state = self.PARTIAL
-        self.start_factor = start_factor
-        self.end_factor = end_factor
-        self.start_timestamp=start_timestamp
-        self.end_timestamp=end_timestamp
+        self.start_factor = start_timestamp.minute / 60
+        self.end_factor = end_timestamp.minute / 60
+        self.start_timestamp = start_timestamp
+        self.end_timestamp = end_timestamp
         self.value = ""
 
-    def set_reverse_partial(self, start_factor, end_factor, start_timestamp=None, end_timestamp=None):
+    def set_reverse_partial(self, start_timestamp, end_timestamp):
         self.state = self.REVERSE_PARTIAL
-        self.start_factor = start_factor
-        self.end_factor = end_factor
+        self.start_factor = start_timestamp.minute / 60
+        self.end_factor = end_timestamp.minute / 60
         self.start_timestamp = start_timestamp
         self.end_timestamp = end_timestamp
         self.value = ""
@@ -167,7 +167,8 @@ class TableCell(object):
             styles = [
                 "border-left: none;",
                 "background-color: {self.color};".format(self=self),
-                "background-image: linear-gradient(to right, {self.BACKGROUND_COLOR} 0%, {self.BACKGROUND_COLOR} 100%);".format(self=self),
+                "background-image: linear-gradient(to right, {self.BACKGROUND_COLOR} 0%, {self.BACKGROUND_COLOR} 100%);".format(
+                    self=self),
                 "background-repeat: no-repeat;",
                 "background-position: {}% 100%;".format(int(self.start_factor * 100)),
                 "background-size: {}% 100%".format(int(fill * 100))]
